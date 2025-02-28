@@ -1,6 +1,8 @@
-import 'dart:typed_data';
+import 'dart:async';
 
-import 'package:vid_kit/compress/vid_kit_compress_progress.dart';
+import 'package:flutter/foundation.dart';
+import 'package:vid_kit/compress/vid_kit_compress_controller.dart';
+import 'package:vid_kit/compress/vid_kit_compress_interface.dart';
 import 'package:vid_kit/enums/vid_kit_quality.dart';
 import 'package:vid_kit/vid_kit_method_channel.dart';
 
@@ -8,8 +10,11 @@ import 'vid_kit_platform_interface.dart';
 
 class VidKit {
   final VidKitPlatform _vidKitPlatform;
+  final VidKitCompressInterface _compressProgress;
 
-  VidKit() : _vidKitPlatform = MethodChannelVidKit.instance;
+  VidKit()
+      : _vidKitPlatform = MethodChannelVidKit(),
+        _compressProgress = VidKitCompressInterface.instance;
 
   Future<Duration> getVideoDuration(String path) =>
       _vidKitPlatform.getVideoDuration(path);
@@ -31,25 +36,19 @@ class VidKit {
       _vidKitPlatform.getThumbnail(
           path: path, quality: quality, position: position);
 
-  Future<String> compressVideo(
+  FutureOr<String> compressVideo(
     String path, {
-    VidKitQuality quality = VidKitQuality.res1280x720Quality,
+    VidKitQuality quality = VidKitQuality.mediumQuality,
     bool? includeAudio,
     int frameRate = 30,
   }) =>
-      _vidKitPlatform.compressVideo(
-        path: path,
-        quality: quality,
-        includeAudio: includeAudio,
-        frameRate: frameRate,
-      );
+      _compressProgress.compressVideo(
+          path: path, quality: quality, frameRate: frameRate);
 
-  bool get isCompressing => _vidKitPlatform.isCompressing;
+  VidKitCompressController get compressController =>
+      _compressProgress.controller;
 
-  VidKitCompressProgress? get compressProgress =>
-      _vidKitPlatform.compressProgress;
+  Future<void> cancelCompression() => _compressProgress.cancelCompression();
 
-  Future<void> cancelCompression() => _vidKitPlatform.cancelCompression();
-
-  Future<void> dispose() => _vidKitPlatform.dispose();
+  Future<void> dispose() => _compressProgress.dispose();
 }

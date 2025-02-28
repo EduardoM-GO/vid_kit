@@ -34,12 +34,6 @@ class _VideoThumbnailState extends State<VideoThumbnail> {
   }
 
   @override
-  void dispose() {
-    _vidKit.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(

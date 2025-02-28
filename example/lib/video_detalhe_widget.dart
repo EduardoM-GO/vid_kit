@@ -39,12 +39,6 @@ class _VideoDetalheWidgetState extends State<VideoDetalheWidget> {
   }
 
   @override
-  void dispose() {
-    _vidKitPlugin.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
@@ -62,25 +56,21 @@ class _VideoDetalheWidgetState extends State<VideoDetalheWidget> {
   }
 
   Widget get compressVideo {
-    if (_vidKitPlugin.compressProgress == null) {
-      return SizedBox();
-    }
-
     return AnimatedBuilder(
-      animation: _vidKitPlugin.compressProgress!,
+      animation: _vidKitPlugin.compressController,
       builder: (context, child) =>
-          _vidKitPlugin.compressProgress!.progress == null
-              ? SizedBox()
-              : Column(
+          _vidKitPlugin.compressController.isCompressing
+              ? Column(
                   mainAxisSize: MainAxisSize.min,
                   spacing: 8,
                   children: [
                     child!,
                     LinearProgressIndicator(
-                      value: _vidKitPlugin.compressProgress!.progress,
+                      value: _vidKitPlugin.compressController.progress,
                     ),
                   ],
-                ),
+                )
+              : SizedBox(),
       child: Text('Compressão ...'),
     );
   }

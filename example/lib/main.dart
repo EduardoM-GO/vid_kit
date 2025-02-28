@@ -77,13 +77,17 @@ class _MyHomeState extends State<MyHome> {
               ),
               FloatingActionButton(
                 heroTag: UniqueKey(),
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => VideoThumbnail(
-                      path: _file!.path,
-                    ),
-                  ),
-                ),
+                onPressed: () => Navigator.of(context)
+                    .push(
+                      MaterialPageRoute(
+                        builder: (context) => VideoThumbnail(
+                          path: _file!.path,
+                        ),
+                      ),
+                    )
+                    .whenComplete(() => setState(() {
+                      
+                    })),
                 child: Icon(Icons.image),
               ),
             ]
@@ -130,19 +134,12 @@ class _MyHomeState extends State<MyHome> {
   }
 
   void compress() async {
-    if (_vidKitPlugin.isCompressing) {
-      return;
-    }
-    setState(() {
-      isLoading = true;
-    });
     final String path = _file!.path;
     final result = await _vidKitPlugin.compressVideo(
       path,
       quality: VidKitQuality.mediumQuality,
     );
     setState(() {
-      isLoading = false;
       _file = File(result);
     });
   }

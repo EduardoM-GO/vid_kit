@@ -2,25 +2,15 @@ import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:vid_kit/compress/vid_kit_compress.dart';
-import 'package:vid_kit/compress/vid_kit_compress_progress.dart';
-import 'package:vid_kit/enums/vid_kit_quality.dart';
 
 import 'vid_kit_platform_interface.dart';
 
 /// An implementation of [VidKitPlatform] that uses method channels.
 final class MethodChannelVidKit extends VidKitPlatform {
-  static MethodChannelVidKit? _instance;
-
-  /// The method channel used to interact with the native platform.
   @visibleForTesting
   static const methodChannel = MethodChannel('vid_kit');
-  final VidKitCompress _compress;
 
-  MethodChannelVidKit._() : _compress = VidKitCompress(methodChannel);
-
-  static MethodChannelVidKit get instance =>
-      _instance ??= MethodChannelVidKit._();
+  MethodChannelVidKit();
 
   @override
   Future<Duration> getVideoDuration(String path) async {
@@ -73,48 +63,6 @@ final class MethodChannelVidKit extends VidKitPlatform {
     return result;
   }
 
-  @override
-  VidKitCompressProgress? get compressProgress => _compress;
-
-  @override
-  bool get isCompressing => _compress.isCompressing;
-
-  @override
-  Future<String> compressVideo({
-    required String path,
-    required VidKitQuality quality,
-    bool? includeAudio,
-    required int frameRate,
-  }) async {
-    if (isCompressing) {
-      throw StateError('''VideoCompress Error: 
-      Method: compressVideo
-      Already have a compression process, you need to wait for the process to finish or stop it''');
-    }
-
-    _compress.isCompressing = true;
-
-    final result = await _invokeMethod<String>('compressVideo', {
-      'path': path,
-      'quality': quality.index,
-      'includeAudio': includeAudio,
-      'frameRate': frameRate,
-    });
-
-    _compress.isCompressing = false;
-
-    if (result == null) {
-      throw ArgumentError.notNull('compressVideo');
-    }
-
-    return result;
-  }
-
-  @override
-  Future<void> cancelCompression() async {
-    await _invokeMethod<String>('cancelCompression');
-  }
-
   Future<T?> _invokeMethod<T>(String method,
       [Map<String, dynamic>? arguments]) async {
     try {
@@ -132,14 +80,5 @@ final class MethodChannelVidKit extends VidKitPlatform {
       );
     }
     return null;
-  }
-
-  @override
-  Future<void> dispose() async {
-    if (_compress.isCompressing) {
-      await cancelCompression();
-    }
-    _compress.dispose();
-    _instance = null;
   }
 }
