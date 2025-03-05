@@ -5,7 +5,7 @@ import 'package:vid_kit/vid_kit_method_channel.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  MethodChannelVidKit platform = MethodChannelVidKit.instance;
+  MethodChannelVidKit platform = MethodChannelVidKit();
   const MethodChannel channel = MethodChannel('vid_kit');
 
   group('vid kit method channel - trimVideo -', () {

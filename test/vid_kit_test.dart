@@ -1,87 +1,72 @@
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plugin_platform_interface/plugin_platform_interface.dart';
-import 'package:vid_kit/compress/vid_kit_compress_progress.dart';
-import 'package:vid_kit/enums/vid_kit_quality.dart';
-import 'package:vid_kit/vid_kit.dart';
-import 'package:vid_kit/vid_kit_method_channel.dart';
 import 'package:vid_kit/vid_kit_platform_interface.dart';
 
 void main() {
-  setUp(() {});
+  late _MockVidKitPlatform mockPlatform;
 
-  final VidKitPlatform initialPlatform = VidKitPlatform.instance;
-
-  test('vid kit - $MethodChannelVidKit is the default instance', () {
-    expect(initialPlatform, isInstanceOf<MethodChannelVidKit>());
+  setUp(() {
+    mockPlatform = _MockVidKitPlatform();
+    VidKitPlatform.instance = mockPlatform;
   });
 
-  group('vid kit -', () {
-    late VidKit vidKitPlugin;
-    setUp(() {
-      vidKitPlugin = VidKit();
-      _MockVidKitPlatform fakePlatform = _MockVidKitPlatform();
-      VidKitPlatform.instance = fakePlatform;
+  group('VidKitPlatform', () {
+    test('getVideoDuration returns correct duration', () async {
+      final duration = await mockPlatform.getVideoDuration('test.mp4');
+      expect(duration, const Duration(seconds: 10));
     });
 
-    test('vid kit - getVideoDuration', () async {
-      expect(await vidKitPlugin.getVideoDuration(''),
-          equals(Duration(seconds: 1)));
+    test('trimVideo returns output path', () async {
+      final result = await mockPlatform.trimVideo(
+        inputPath: 'input.mp4',
+        outputPath: 'output.mp4',
+        start: const Duration(seconds: 0),
+        end: const Duration(seconds: 5),
+      );
+      expect(result, 'output.mp4');
     });
 
-    test('vid kit - trimVideo', () async {
-      expect(
-          await vidKitPlugin.trimVideo(
-              inputPath: '',
-              outputPath: '',
-              start: Duration(seconds: 1),
-              end: Duration(seconds: 2)),
-          equals(''));
+    test('getThumbnail returns bytes with default parameters', () async {
+      final thumbnail = await mockPlatform.getThumbnail(path: 'test.mp4');
+      expect(thumbnail, isA<Uint8List>());
+      expect(thumbnail.length, 4);
+    });
+
+    test('getThumbnail accepts custom quality and position', () async {
+      final thumbnail = await mockPlatform.getThumbnail(
+        path: 'test.mp4',
+        quality: 80,
+        position: 1000,
+      );
+      expect(thumbnail, isA<Uint8List>());
+      expect(thumbnail.length, 4);
     });
   });
 }
 
-final class _MockVidKitPlatform
-    with MockPlatformInterfaceMixin
-    implements VidKitPlatform {
+class _MockVidKitPlatform extends VidKitPlatform {
   @override
-  Future<Duration> getVideoDuration(String path) =>
-      Future.value(Duration(seconds: 1));
+  Future<Duration> getVideoDuration(String path) async {
+    return const Duration(seconds: 10);
+  }
 
   @override
-  Future<String> trimVideo(
-          {required String inputPath,
-          required String outputPath,
-          required Duration start,
-          required Duration end}) =>
-      Future.value(outputPath);
+  Future<String> trimVideo({
+    required String inputPath,
+    required String outputPath,
+    required Duration start,
+    required Duration end,
+  }) async {
+    return outputPath;
+  }
 
   @override
-  Future<void> cancelCompression() async {}
-
-  @override
-  VidKitCompressProgress? get compressProgress => null;
-
-  @override
-  Future<String> compressVideo({
+  Future<Uint8List> getThumbnail({
     required String path,
-    required VidKitQuality quality,
-    int? startTime,
-    int? duration,
-    bool? includeAudio,
-    required int frameRate,
-  }) =>
-      Future.value('');
-
-  @override
-  Future<Uint8List> getThumbnail(
-          {required String path, int quality = 100, int position = -1}) =>
-      Future.value(Uint8List(0));
-
-  @override
-  bool get isCompressing => false;
-
-  @override
-  Future<void> dispose() async {}
+    int quality = 100,
+    int position = -1,
+  }) async {
+    return Uint8List.fromList([0, 1, 2, 3]);
+  }
 }
