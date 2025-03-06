@@ -36,8 +36,8 @@ class VidKit {
       _vidKitPlatform.getThumbnail(
           path: path, quality: quality, position: position);
 
-  FutureOr<String> compressVideo(
-    String path, {
+  FutureOr<String> compressVideo({
+    required String path,
     VidKitQuality quality = VidKitQuality.mediumQuality,
     bool? includeAudio,
     int frameRate = 30,

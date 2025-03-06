@@ -85,9 +85,7 @@ class _MyHomeState extends State<MyHome> {
                         ),
                       ),
                     )
-                    .whenComplete(() => setState(() {
-                      
-                    })),
+                    .whenComplete(() => setState(() {})),
                 child: Icon(Icons.image),
               ),
             ]
@@ -136,7 +134,7 @@ class _MyHomeState extends State<MyHome> {
   void compress() async {
     final String path = _file!.path;
     final result = await _vidKitPlugin.compressVideo(
-      path,
+      path: path,
       quality: VidKitQuality.mediumQuality,
     );
     setState(() {

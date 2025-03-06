@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -31,6 +32,11 @@ final class MethodChannelVidKit extends VidKitPlatform {
     required Duration start,
     required Duration end,
   }) async {
+    final fileOutput = File(outputPath);
+    if (fileOutput.existsSync()) {
+      fileOutput.deleteSync();
+    }
+
     final result = await _invokeMethod<String>('trimVideo', {
       'inputPath': inputPath,
       'outputPath': outputPath,
